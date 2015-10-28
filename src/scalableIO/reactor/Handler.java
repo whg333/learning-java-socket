@@ -1,5 +1,7 @@
 package scalableIO.reactor;
 
+import static scalableIO.Logger.log;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -73,7 +75,7 @@ public abstract class Handler extends Thread {
 				return;
 			}
 			
-			System.out.println("received from client:"+readData+", "+readData.length());
+			log("received from client:"+readData+", "+readData.length());
 			//if(inputIsComplete()){
 				//process();
 				state = State.WRITING;
@@ -85,7 +87,7 @@ public abstract class Handler extends Thread {
 		}
 	}
 	
-
+	//TODO 修改为复用output，即当output容量不足的时候就反复write，而不是每次都使用wrap来new一个新的
 	private void write(){
 		try {
 			output = ByteBuffer.wrap(readData.toString().getBytes());
@@ -93,7 +95,7 @@ public abstract class Handler extends Thread {
 				clientSocket.write(output);
 			}while(!outputIsComplete());
 			
-			System.out.println("writed to client:"+readData+", "+readData.length());
+			log("writed to client:"+readData+", "+readData.length());
 			if(isQuit()){
 				key.cancel();
 			}else{
