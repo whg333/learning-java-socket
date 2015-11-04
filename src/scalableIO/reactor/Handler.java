@@ -27,9 +27,9 @@ public abstract class Handler extends Thread {
 	protected final SocketChannel clientChannel;
 	protected final SelectionKey key;
 	
-	protected final ByteBuffer input;
+	protected final ByteBuffer readBuf;
 	protected final StringBuilder readData = new StringBuilder();
-	protected ByteBuffer output;
+	protected ByteBuffer writeBuf;
 	
 	public Handler(Selector selector, SocketChannel clientChannel){
 		this.state = State.CONNECTING;
@@ -44,7 +44,7 @@ public abstract class Handler extends Thread {
 		selector.wakeup();
 		this.clientChannel = clientChannel;
 		this.key = key;
-		this.input = ByteBuffer.allocate(byteBufferSize());
+		this.readBuf = ByteBuffer.allocate(byteBufferSize());
 	}
 	
 	@Override
@@ -71,9 +71,9 @@ public abstract class Handler extends Thread {
 	private void read(){
 		int readSize;
 		try {
-			while((readSize = clientChannel.read(input)) > 0){
-				readData.append(new String(Arrays.copyOfRange(input.array(), 0, readSize)));
-				input.clear();
+			while((readSize = clientChannel.read(readBuf)) > 0){
+				readData.append(new String(Arrays.copyOfRange(readBuf.array(), 0, readSize)));
+				readBuf.clear();
 			}
 			if(readSize == -1){
 				//key.cancel();
@@ -99,7 +99,7 @@ public abstract class Handler extends Thread {
 			disconnect();
 			return false;
 		}
-		output = ByteBuffer.wrap(readData.toString().getBytes());
+		writeBuf = ByteBuffer.wrap(readData.toString().getBytes());
 		readData.delete(0, readData.length());
 		return true;
 	}
@@ -107,7 +107,7 @@ public abstract class Handler extends Thread {
 	private void write(){
 		try {
 			do{
-				clientChannel.write(output);
+				clientChannel.write(writeBuf);
 			}while(!writeIsComplete());
 		} catch (IOException e) {
 			e.printStackTrace();

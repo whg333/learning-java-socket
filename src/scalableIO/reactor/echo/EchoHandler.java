@@ -23,7 +23,7 @@ public class EchoHandler extends Handler {
 	
 	@Override
 	public boolean writeIsComplete() {
-		return !output.hasRemaining();
+		return !writeBuf.hasRemaining();
 	}
 
 }
