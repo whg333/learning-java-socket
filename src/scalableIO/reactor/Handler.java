@@ -77,12 +77,11 @@ public abstract class Handler extends Thread {
 			}
 			
 			log("received from client:"+readData+", "+readData.length());
-			if(inputIsComplete()){
+			if(readIsComplete()){
 				process();
 				state = State.WRITING;
 				key.interestOps(SelectionKey.OP_WRITE);
 			}
-			//input.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
 			disconnect();
@@ -99,7 +98,7 @@ public abstract class Handler extends Thread {
 		try {
 			do{
 				clientChannel.write(output);
-			}while(!outputIsComplete());
+			}while(!writeIsComplete());
 			
 			log("writed to client:"+readData+", "+readData.length());
 			if(isQuit()){
@@ -135,8 +134,8 @@ public abstract class Handler extends Thread {
 	
 	public abstract int byteBufferSize();
 
-	public abstract boolean inputIsComplete();
+	public abstract boolean readIsComplete();
 
-	public abstract boolean outputIsComplete();
+	public abstract boolean writeIsComplete();
 
 }

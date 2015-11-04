@@ -17,12 +17,12 @@ public class EchoHandler extends Handler {
 	}
 	
 	@Override
-	public boolean inputIsComplete() {
+	public boolean readIsComplete() {
 		return readData.length() > 0;
 	}
 	
 	@Override
-	public boolean outputIsComplete() {
+	public boolean writeIsComplete() {
 		return !output.hasRemaining();
 	}
 
