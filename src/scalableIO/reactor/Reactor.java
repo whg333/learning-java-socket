@@ -36,7 +36,7 @@ public abstract class Reactor extends Thread{
 	
 	@Override
 	public void run(){
-		log("Reactor start on "+port+" ..."+"\n");
+		log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
 		try {
 			while(!Thread.interrupted()){
 				selector.select();

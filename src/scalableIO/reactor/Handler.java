@@ -13,7 +13,7 @@ import java.util.Arrays;
 public abstract class Handler extends Thread {
 
 	private enum State{
-		CONNECTING, READING, WRITING, DISCONNECTING;
+		CONNECTING, READING, WRITING;
 	}
 	private State state = State.CONNECTING;
 	
@@ -51,9 +51,6 @@ public abstract class Handler extends Thread {
 			case WRITING:
 				write();
 				break;
-			case DISCONNECTING:
-				disconnect();
-				break;
 			default:
 				throw new IllegalArgumentException("Unsupported State:"+state);
 		}
@@ -75,23 +72,29 @@ public abstract class Handler extends Thread {
 				disconnect();
 				return;
 			}
-			
-			log("received from client:"+readData+", "+readData.length());
-			if(readIsComplete()){
-				process();
-				state = State.WRITING;
-				key.interestOps(SelectionKey.OP_WRITE);
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			disconnect();
 		}
+		
+		log("received from client:"+readData+", "+readData.length());
+		if(readIsComplete() && process()){
+			state = State.WRITING;
+			key.interestOps(SelectionKey.OP_WRITE);
+		}
 	}
 	
 	//TODO 修改为复用output，即当output容量不足的时候就反复write，而不是每次都使用wrap来new一个新的
-	public void process(){
+	public boolean process(){
+		log("readData="+readData.toString());
+		if(isQuit()){
+			//key.cancel();
+			disconnect();
+			return false;
+		}
 		output = ByteBuffer.wrap(readData.toString().getBytes());
 		readData.delete(0, readData.length());
+		return true;
 	}
 	
 	private void write(){
@@ -99,20 +102,15 @@ public abstract class Handler extends Thread {
 			do{
 				clientChannel.write(output);
 			}while(!writeIsComplete());
-			
-			log("writed to client:"+readData+", "+readData.length());
-			if(isQuit()){
-				//key.cancel();
-				disconnect();
-			}else{
-				state = State.READING;
-				key.interestOps(SelectionKey.OP_READ);
-				//感兴趣key变化后必须重置附件？！否则连续2次回车后，read事件读取原来的附件读取不到（readSize==0）
-				//key.attach(this);
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		log("writed to client:"+readData+", "+readData.length());
+		state = State.READING;
+		key.interestOps(SelectionKey.OP_READ);
+		//感兴趣key变化后必须重置附件？！否则连续2次回车后，read事件读取原来的附件读取不到（readSize==0）
+		//key.attach(this);
 	}
 	
 	public boolean isQuit(){
