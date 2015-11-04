@@ -13,10 +13,17 @@ import java.util.Arrays;
 public abstract class Handler extends Thread {
 
 	private enum State{
-		CONNECTING, READING, WRITING;
+		CONNECTING(0), 
+		READING(SelectionKey.OP_READ),
+		WRITING(SelectionKey.OP_WRITE);
+		
+		private final int opBit;
+		private State(int operateBit){
+			opBit = operateBit;
+		}
 	}
-	private State state = State.CONNECTING;
 	
+	private State state;
 	protected final SocketChannel clientChannel;
 	protected final SelectionKey key;
 	
@@ -25,10 +32,11 @@ public abstract class Handler extends Thread {
 	protected ByteBuffer output;
 	
 	public Handler(Selector selector, SocketChannel clientChannel){
+		this.state = State.CONNECTING;
 		SelectionKey key = null;
 		try {
 			clientChannel.configureBlocking(false);
-			key = clientChannel.register(selector, SelectionKey.OP_READ);
+			key = clientChannel.register(selector, this.state.opBit);
 			key.attach(this);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -57,7 +65,7 @@ public abstract class Handler extends Thread {
 	}
 	
 	private void connect() {
-		state = State.READING;
+		interestOps(State.READING);
 	}
 
 	private void read(){
@@ -79,8 +87,7 @@ public abstract class Handler extends Thread {
 		
 		log("received from client:"+readData+", "+readData.length());
 		if(readIsComplete() && process()){
-			state = State.WRITING;
-			key.interestOps(SelectionKey.OP_WRITE);
+			interestOps(State.WRITING);
 		}
 	}
 	
@@ -107,10 +114,15 @@ public abstract class Handler extends Thread {
 		}
 		
 		log("writed to client:"+readData+", "+readData.length());
-		state = State.READING;
-		key.interestOps(SelectionKey.OP_READ);
+		
+		interestOps(State.READING);
 		//感兴趣key变化后必须重置附件？！否则连续2次回车后，read事件读取原来的附件读取不到（readSize==0）
 		//key.attach(this);
+	}
+	
+	private void interestOps(State state){
+		this.state = state;
+		key.interestOps(state.opBit);
 	}
 	
 	public boolean isQuit(){
