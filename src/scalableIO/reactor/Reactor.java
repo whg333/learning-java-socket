@@ -1,4 +1,6 @@
 package scalableIO.reactor;
+import static scalableIO.Logger.log;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
@@ -13,7 +15,6 @@ public abstract class Reactor extends Thread{
 	protected final ServerSocketChannel serverChannel;
 	
 	public Reactor(int port){
-		this.port = port;
 		Selector selector = null;
 		ServerSocketChannel serverChannel = null;
 		try {
@@ -26,6 +27,7 @@ public abstract class Reactor extends Thread{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		this.port = port;
 		this.selector = selector;
 		this.serverChannel = serverChannel;
 	}
@@ -34,6 +36,7 @@ public abstract class Reactor extends Thread{
 	
 	@Override
 	public void run(){
+		log("Reactor start on "+port+" ..."+"\n");
 		try {
 			while(!Thread.interrupted()){
 				selector.select();

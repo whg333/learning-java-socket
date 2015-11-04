@@ -18,9 +18,9 @@ public abstract class Acceptor extends Thread {
 	@Override
 	public void run() {
 		try {
-			 SocketChannel clientSocket = serverChannel.accept();
-			 if(clientSocket != null){
-				 handle(selector, clientSocket);
+			 SocketChannel clientChannel = serverChannel.accept();
+			 if(clientChannel != null){
+				 handle(selector, clientChannel);
 			 }
 		} catch (IOException e) {
 			e.printStackTrace();
