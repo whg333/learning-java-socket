@@ -13,7 +13,7 @@ import java.util.Arrays;
 public abstract class Handler extends Thread {
 
 	private enum State{
-		CONNECTING(0), 
+		CONNECTING(0),
 		READING(SelectionKey.OP_READ),
 		WRITING(SelectionKey.OP_WRITE);
 		
