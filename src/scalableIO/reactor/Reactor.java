@@ -43,8 +43,8 @@ public abstract class Reactor extends Thread{
 				Iterator<SelectionKey> keyIt = selector.selectedKeys().iterator();
 				while(keyIt.hasNext()){
 					SelectionKey key = keyIt.next();
-					keyIt.remove();
 					dispatch(key);
+					keyIt.remove();
 				}
 			}
 		} catch (IOException e) {
