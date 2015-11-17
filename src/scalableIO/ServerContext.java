@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import scalableIO.reactor.Reactor;
@@ -22,6 +23,7 @@ public class ServerContext{
 	
 	public static final boolean useReactorPool = true;
 	private static final int subReactorLength = 3;
+	public static final long selectTimeOut = TimeUnit.MILLISECONDS.toMillis(10);
 	private static final AtomicLong nextIndex = new AtomicLong();
 	
 	private static ServerSocketChannel serverChannel;
@@ -71,7 +73,12 @@ public class ServerContext{
 	}
 	
 	public static Reactor nextSubReactor(){
-		return subReactors[(int) (nextIndex.getAndIncrement()%subReactors.length)];
+		long nextIndexValue = nextIndex.getAndIncrement();
+		if(nextIndexValue < 0){
+			nextIndex.set(0);
+			nextIndexValue = 0;
+		}
+		return subReactors[(int) (nextIndexValue%subReactors.length)];
 	}
 	
 	/**

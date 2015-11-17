@@ -2,6 +2,7 @@ package scalableIO.reactor;
 
 import static scalableIO.Logger.log;
 import static scalableIO.ServerContext.isMainReactor;
+import static scalableIO.ServerContext.selectTimeOut;
 import static scalableIO.ServerContext.serverChannel;
 
 import java.io.IOException;
@@ -10,12 +11,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 public abstract class Reactor extends Thread{
 
-	private static final long SELECT_TIME_OUT = TimeUnit.SECONDS.toMillis(3);
-	
 	protected final int port;
 	protected Selector selector;
 //	protected ServerSocketChannel serverChannel;
@@ -55,10 +53,11 @@ public abstract class Reactor extends Thread{
 			while(!Thread.interrupted()){
 				//不可以使用阻塞的select方式，否则accept后subReactor的selector在register的时候会一直阻塞
 				//但是修改为带有超时的select或者selectNow后，subReactor的selector在register就不会阻塞了
+				//最终选择了带有超时的select是因为使用selectNow的无限循环会导致CPU飙高特别快
 				//selector.select();
-				if(selector.selectNow() > 0){
-				//(selector.select(SELECT_TIME_OUT) > 0){
-					log(selector+" isMainReactor="+isMainReactor(this)+" select...");
+				//if(selector.selectNow() > 0){
+				if(selector.select(selectTimeOut) > 0){
+					//log(selector+" isMainReactor="+isMainReactor(this)+" select...");
 					Iterator<SelectionKey> keyIt = selector.selectedKeys().iterator();
 					while(keyIt.hasNext()){
 						SelectionKey key = keyIt.next();

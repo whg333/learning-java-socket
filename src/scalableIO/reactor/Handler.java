@@ -1,10 +1,9 @@
 package scalableIO.reactor;
 
+import static scalableIO.Logger.err;
 import static scalableIO.Logger.log;
 import static scalableIO.ServerContext.execute;
 import static scalableIO.ServerContext.useThreadPool;
-//import static scalableIO.ServerContext.wakeupAll;
-import static scalableIO.ServerContext.mainReactor;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -74,7 +73,7 @@ public abstract class Handler extends Thread {
 				write();
 				break;
 			default:
-				throw new IllegalArgumentException("Unsupported State:"+state);
+				err("\nUnsupported State: "+state+" ! overlap processing with IO...");
 		}
 	}
 	

@@ -10,4 +10,10 @@ public class Logger {
 		}
 	}
 	
+	public static void err(String info){
+		if(isLog){
+			System.err.println(info);
+		}
+	}
+	
 }
