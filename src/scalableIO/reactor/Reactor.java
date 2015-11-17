@@ -26,28 +26,24 @@ public abstract class Reactor extends Thread{
 		this.timeout = timeout;
 	}
 	
-	public void init(){
-		try {
-			selector = Selector.open();
-			log(selector+" isMainReactor="+isMainReactor);
+	private void init() throws IOException{
+		selector = Selector.open();
+		log(selector+" isMainReactor="+isMainReactor);
+		
+		if(isMainReactor){
+			//serverChannel = ServerSocketChannel.open();
+			serverChannel.socket().bind(new InetSocketAddress(port));
+			serverChannel.configureBlocking(false);
+			SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+			key.attach(newAcceptor(selector));
+			log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
+		}else{
 			
-			if(isMainReactor){
-				log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
-				//serverChannel = ServerSocketChannel.open();
-				serverChannel.socket().bind(new InetSocketAddress(port));
-				serverChannel.configureBlocking(false);
-				SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-				key.attach(newAcceptor(selector));
-			}else{
-				
-			}
-			
-			//如果使用阻塞的select方式，且开启下面的代码的话，相当于开启了多个reactor池，而不是mainReactor和subReactor的关系了
-			//SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			//key.attach(newAcceptor(selector, serverChannel));
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+		
+		//如果使用阻塞的select方式，且开启下面的代码的话，相当于开启了多个reactor池，而不是mainReactor和subReactor的关系了
+		//SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+		//key.attach(newAcceptor(selector, serverChannel));
 	}
 	
 	public abstract Acceptor newAcceptor(Selector selector);
@@ -55,10 +51,12 @@ public abstract class Reactor extends Thread{
 	@Override
 	public void run(){
 		try {
+			init();
 			while(!Thread.interrupted()){
 				//不可以使用阻塞的select方式，否则accept后subReactor的selector在register的时候会一直阻塞
 				//但是修改为带有超时的select或者selectNow后，subReactor的selector在register就不会阻塞了
 				//最终选择了带有超时的select是因为使用selectNow的无限循环会导致CPU飙高特别快
+				//并且如果使用阻塞的select方式，还需要知道在哪里调用wakeup，否则会一直阻塞，使用非阻塞方式就不需要wakeup了
 				//selector.select();
 				//if(selector.selectNow() > 0){
 				if(selector.select(timeout) > 0){
@@ -83,10 +81,5 @@ public abstract class Reactor extends Thread{
 			r.run();
 		}
 	}
-	
-//	public void wakeup(){
-//		selector.wakeup();
-//		log(selector+" isMainReactor="+isMainReactor(this)+" wakeup...");
-//	}
 	
 }

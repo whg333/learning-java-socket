@@ -14,7 +14,7 @@ public class EchoAcceptor extends Acceptor {
 	
 	@Override
 	public void handle(Selector selector, SocketChannel clientChannel) {
-		new EchoHandler(selector, clientChannel);
+		new EchoHandler(selector, clientChannel).run();
 	}
 
 }

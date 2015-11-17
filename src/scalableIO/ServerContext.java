@@ -16,11 +16,9 @@ import scalableIO.reactor.Reactor;
 public class ServerContext{
 
 	public static final boolean isLog = true;
-	public static final int port = 9003;
 	
-	private static final boolean useMultipleReactors = true;
 	//public static final boolean useReactorPool = true;
-	private static final int subReactorLength = 3;
+	private static final int subReactorSize = 3;
 	public static final long selectTimeOut = TimeUnit.MILLISECONDS.toMillis(10);
 	private static final AtomicLong nextIndex = new AtomicLong();
 	
@@ -31,7 +29,19 @@ public class ServerContext{
 	public static final boolean useThreadPool = true;
 	private static final ExecutorService executor = Executors.newCachedThreadPool();
 	
-	public static <T extends Reactor> void start(Class<T> clazz){
+	public static <T extends Reactor> void startSingleReactor(int port, Class<T> clazz){
+		start(port, clazz, false, subReactorSize);
+	}
+	
+	public static <T extends Reactor> void startMultipleReactor(int port, Class<T> clazz){
+		start(port, clazz, true, subReactorSize);
+	}
+	
+	public static <T extends Reactor> void startMultipleReactor(int port, Class<T> clazz, int subReactorSize){
+		start(port, clazz, true, subReactorSize);
+	}
+	
+	private static <T extends Reactor> void start(int port, Class<T> clazz, boolean useMultipleReactors, int subReactorSize){
 		try{
 			serverChannel = ServerSocketChannel.open();
 		}catch(IOException e){
@@ -41,13 +51,11 @@ public class ServerContext{
 		try {
 			Constructor<T> constructor = clazz.getConstructor(int.class, ServerSocketChannel.class, boolean.class, boolean.class, long.class);
 			mainReactor = constructor.newInstance(port, serverChannel, true, useMultipleReactors, selectTimeOut);
-			mainReactor.init();
 			
 			if(useMultipleReactors){
-				subReactors = new Reactor[subReactorLength];
+				subReactors = new Reactor[subReactorSize];
 				for(int i=0;i<subReactors.length;i++){
 					subReactors[i] = constructor.newInstance(port, serverChannel, false, useMultipleReactors, selectTimeOut);
-					subReactors[i].init();
 				}
 			}
 		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException 

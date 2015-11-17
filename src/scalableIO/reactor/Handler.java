@@ -36,28 +36,21 @@ public abstract class Handler extends Thread {
 	protected ByteBuffer writeBuf;
 	
 	public Handler(Selector selector, SocketChannel clientChannel){
-//		selector.wakeup();
-//		wakeupAll();
-//		selector = mainReactor().selector;
 		this.state = State.CONNECTING;
 		SelectionKey key = null;
 		try {
 			clientChannel.configureBlocking(false);
-			log(selector+" 1..."+selector.isOpen());
-			//这里在使用subSelector的时候会阻塞，为什么？
-			//因为需要serverChannel注册selector的accept事件！？必须对应上才可以通过，否则阻塞
+			//这里在使用subSelector的时候会阻塞，为什么？是因为使用了阻塞的select方法，非阻塞的才可以
+			//但如果使用reactor池的话，那是因为需要serverChannel注册selector的accept事件！？必须对应上才可以通过，否则阻塞
 			key = clientChannel.register(selector, this.state.opBit);
-			log(selector+" 2...");
 			key.attach(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		wakeupAll();
 		this.clientChannel = clientChannel;
 		this.key = key;
-		interestOps(State.READING);
-//		selector.wakeup();
 		this.readBuf = ByteBuffer.allocate(byteBufferSize());
+		log(selector+" connect success...");
 	}
 	
 	@Override
@@ -182,9 +175,6 @@ public abstract class Handler extends Thread {
 	private void interestOps(State state){
 		this.state = state;
 		key.interestOps(state.opBit);
-		
-//		key.selector().wakeup();
-//		wakeupAll();
 	}
 	
 	public boolean isQuit(){

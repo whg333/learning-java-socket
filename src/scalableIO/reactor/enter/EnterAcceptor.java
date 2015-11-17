@@ -14,7 +14,7 @@ public class EnterAcceptor extends Acceptor {
 	
 	@Override
 	public void handle(Selector selector, SocketChannel clientChannel) {
-		new EnterHandler(selector, clientChannel);
+		new EnterHandler(selector, clientChannel).run();
 	}
 
 }

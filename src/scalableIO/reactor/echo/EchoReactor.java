@@ -1,5 +1,6 @@
 package scalableIO.reactor.echo;
 
+import java.io.IOException;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 
@@ -18,9 +19,10 @@ public class EchoReactor extends Reactor {
 		return new EchoAcceptor(selector, serverChannel, useMultipleReactors);
 	}
 	
-	public static void main(String[] args) {
-		//new EchoReactor(9002).start();
-		ServerContext.start(EchoReactor.class);
+	public static void main(String[] args) throws IOException {
+		//new EchoReactor(9003, ServerSocketChannel.open(), true, false, TimeUnit.MILLISECONDS.toMillis(10)).start();
+		ServerContext.startSingleReactor(9003, EchoReactor.class);
+		ServerContext.startMultipleReactor(9004, EchoReactor.class);
 	}
 
 }

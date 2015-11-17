@@ -1,5 +1,6 @@
 package scalableIO.reactor.enter;
 
+import java.io.IOException;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 
@@ -18,9 +19,10 @@ public class EnterReactor extends Reactor {
 		return new EnterAcceptor(selector, serverChannel, useMultipleReactors);
 	}
 	
-	public static void main(String[] args) {
-		//new EnterReactor(9003).start();
-		ServerContext.start(EnterReactor.class);
+	public static void main(String[] args) throws IOException {
+		//new EnterReactor(9003, ServerSocketChannel.open(), true, false, TimeUnit.MILLISECONDS.toMillis(10)).start();
+		ServerContext.startMultipleReactor(9003, EnterReactor.class);
+		//ServerContext.startSingleReactor(9003, EnterReactor.class);
 	}
 
 }
