@@ -3,6 +3,8 @@ package scalableIO.reactor;
 import static scalableIO.Logger.log;
 import static scalableIO.ServerContext.execute;
 import static scalableIO.ServerContext.useThreadPool;
+//import static scalableIO.ServerContext.wakeupAll;
+import static scalableIO.ServerContext.mainReactor;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -35,18 +37,27 @@ public abstract class Handler extends Thread {
 	protected ByteBuffer writeBuf;
 	
 	public Handler(Selector selector, SocketChannel clientChannel){
+//		selector.wakeup();
+//		wakeupAll();
+//		selector = mainReactor().selector;
 		this.state = State.CONNECTING;
 		SelectionKey key = null;
 		try {
 			clientChannel.configureBlocking(false);
+			log(selector+" 1..."+selector.isOpen());
+			//这里在使用subSelector的时候会阻塞，为什么？
+			//因为需要serverChannel注册selector的accept事件！？必须对应上才可以通过，否则阻塞
 			key = clientChannel.register(selector, this.state.opBit);
+			log(selector+" 2...");
 			key.attach(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		selector.wakeup();
+//		wakeupAll();
 		this.clientChannel = clientChannel;
 		this.key = key;
+		interestOps(State.READING);
+//		selector.wakeup();
 		this.readBuf = ByteBuffer.allocate(byteBufferSize());
 	}
 	
@@ -80,9 +91,10 @@ public abstract class Handler extends Thread {
 	 * <br/>
 	 * 其实就是害怕重叠IO和工作线程处理不一致：例如Reactor单线程读某个key的IO完毕后立马开启工作线程的处理，
 	 * 紧接着Reactor单线程处理第二个IO key的时候发现还是之前的那个key的读IO事件，但是之前同一个key的处理还未完成，
-	 * 不等待之前的处理完成的话，就会出现多个线程同时访问修改Handler里面数据的情况，导致出错
+	 * 不等待之前的处理完成的话，就会出现多个线程同时访问修改Handler里面数据的情况，导致出错，
+	 * 但是最好先把数据都全部读入buffer中就可以规避了！？
 	 */
-	private synchronized void read(){
+	private /*synchronized*/ void read(){
 		int readSize;
 		try {
 			while((readSize = clientChannel.read(readBuf)) > 0){
@@ -121,14 +133,15 @@ public abstract class Handler extends Thread {
 		}
 	}
 	
-	private synchronized void processAndHandOff(){
+	private /*synchronized*/ void processAndHandOff(){
 		if(process()){
 			interestOps(State.WRITING);
-			if(useThreadPool){
+//			if(useThreadPool){
 				//在另一个线程中改变key感兴趣IO事件的话，需要强迫selector立即返回，但单线程中不强迫也会生效？
 				//对key感兴趣IO事件改变的话，都只在下次调用了select后才会生效，故有必要强迫selector立即返回
-				key.selector().wakeup();
-			}
+//				key.selector().wakeup();
+//				wakeupAll();
+//			}
 		}
 	}
 	
@@ -170,6 +183,9 @@ public abstract class Handler extends Thread {
 	private void interestOps(State state){
 		this.state = state;
 		key.interestOps(state.opBit);
+		
+//		key.selector().wakeup();
+//		wakeupAll();
 	}
 	
 	public boolean isQuit(){

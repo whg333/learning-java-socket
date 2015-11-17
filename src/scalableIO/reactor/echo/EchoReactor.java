@@ -8,7 +8,7 @@ import scalableIO.reactor.Reactor;
 
 public class EchoReactor extends Reactor {
 	
-	EchoReactor(int port){
+	public EchoReactor(int port){
 		super(port);
 	}
 

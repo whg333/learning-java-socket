@@ -3,12 +3,13 @@ package scalableIO.reactor.enter;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 
+import scalableIO.ServerContext;
 import scalableIO.reactor.Acceptor;
 import scalableIO.reactor.Reactor;
 
 public class EnterReactor extends Reactor {
 	
-	EnterReactor(int port){
+	public EnterReactor(int port){
 		super(port);
 	}
 
@@ -18,7 +19,8 @@ public class EnterReactor extends Reactor {
 	}
 	
 	public static void main(String[] args) {
-		new EnterReactor(9003).start();
+		//new EnterReactor(9003).start();
+		ServerContext.start(EnterReactor.class, 9003);
 	}
 
 }

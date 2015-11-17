@@ -1,5 +1,8 @@
 package scalableIO.reactor;
+
 import static scalableIO.Logger.log;
+import static scalableIO.ServerContext.isMainReactor;
+import static scalableIO.ServerContext.serverChannel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -7,46 +10,64 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Reactor extends Thread{
 
+	private static final long SELECT_TIME_OUT = TimeUnit.SECONDS.toMillis(3);
+	
 	protected final int port;
-	protected final Selector selector;
-	protected final ServerSocketChannel serverChannel;
+	protected Selector selector;
+//	protected ServerSocketChannel serverChannel;
 	
 	public Reactor(int port){
-		Selector selector = null;
-		ServerSocketChannel serverChannel = null;
+		this.port = port;
+	}
+	
+	public void configure(){
+		ServerSocketChannel serverChannel = serverChannel();
 		try {
 			selector = Selector.open();
-			serverChannel = ServerSocketChannel.open();
-			serverChannel.socket().bind(new InetSocketAddress(port));
-			serverChannel.configureBlocking(false);
-			SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			key.attach(newAcceptor(selector, serverChannel));
+			log(selector+" isMainReactor="+isMainReactor(this));
+			if(isMainReactor(this)){
+				log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
+				//serverChannel = ServerSocketChannel.open();
+				serverChannel.socket().bind(new InetSocketAddress(port));
+				serverChannel.configureBlocking(false);
+				SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+				key.attach(newAcceptor(selector, serverChannel));
+			}else{
+				
+			}
+			//如果使用阻塞的select方式，且开启下面的代码的话，相当于开启了多个reactor池，而不是mainReactor和subReactor的关系了
+			//SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+			//key.attach(newAcceptor(selector, serverChannel));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		this.port = port;
-		this.selector = selector;
-		this.serverChannel = serverChannel;
 	}
 	
 	public abstract Acceptor newAcceptor(Selector selector, ServerSocketChannel serverChannel);
 	
 	@Override
 	public void run(){
-		log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
 		try {
 			while(!Thread.interrupted()){
-				selector.select();
-				Iterator<SelectionKey> keyIt = selector.selectedKeys().iterator();
-				while(keyIt.hasNext()){
-					SelectionKey key = keyIt.next();
-					dispatch(key);
-					keyIt.remove();
+				//不可以使用阻塞的select方式，否则accept后subReactor的selector在register的时候会一直阻塞
+				//但是修改为带有超时的select或者selectNow后，subReactor的selector在register就不会阻塞了
+				//selector.select();
+				if(selector.selectNow() > 0){
+				//(selector.select(SELECT_TIME_OUT) > 0){
+					log(selector+" isMainReactor="+isMainReactor(this)+" select...");
+					Iterator<SelectionKey> keyIt = selector.selectedKeys().iterator();
+					while(keyIt.hasNext()){
+						SelectionKey key = keyIt.next();
+						dispatch(key);
+						keyIt.remove();
+					}
 				}
 			}
+			log(getClass().getSimpleName()+" end on "+port+" ..."+"\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -59,8 +80,9 @@ public abstract class Reactor extends Thread{
 		}
 	}
 	
-	public int getPort() {
-		return port;
-	}
+//	public void wakeup(){
+//		selector.wakeup();
+//		log(selector+" isMainReactor="+isMainReactor(this)+" wakeup...");
+//	}
 	
 }
