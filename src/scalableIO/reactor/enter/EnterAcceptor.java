@@ -8,8 +8,8 @@ import scalableIO.reactor.Acceptor;
 
 public class EnterAcceptor extends Acceptor {
 
-	EnterAcceptor(Selector selector, ServerSocketChannel serverChannel){
-		super(selector, serverChannel);
+	EnterAcceptor(Selector selector, ServerSocketChannel serverChannel, boolean useMultipleReactors){
+		super(selector, serverChannel, useMultipleReactors);
 	}
 	
 	@Override

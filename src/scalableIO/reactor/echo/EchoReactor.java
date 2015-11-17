@@ -9,18 +9,18 @@ import scalableIO.reactor.Reactor;
 
 public class EchoReactor extends Reactor {
 	
-	public EchoReactor(int port){
-		super(port);
+	public EchoReactor(int port, ServerSocketChannel serverChannel, boolean isMainReactor, boolean useMultipleReactors, long timeout){
+		super(port, serverChannel, isMainReactor, useMultipleReactors, timeout);
 	}
 
 	@Override
-	public Acceptor newAcceptor(Selector selector, ServerSocketChannel serverChannel) {
-		return new EchoAcceptor(selector, serverChannel);
+	public Acceptor newAcceptor(Selector selector) {
+		return new EchoAcceptor(selector, serverChannel, useMultipleReactors);
 	}
 	
 	public static void main(String[] args) {
 		//new EchoReactor(9002).start();
-		ServerContext.start(EchoReactor.class, 9003);
+		ServerContext.start(EchoReactor.class);
 	}
 
 }

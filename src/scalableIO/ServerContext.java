@@ -16,38 +16,39 @@ import scalableIO.reactor.Reactor;
 public class ServerContext{
 
 	public static final boolean isLog = true;
-	public static final int porn = 9005;
+	public static final int port = 9003;
 	
-	public static final boolean useThreadPool = true;
-	private static final ExecutorService executor = Executors.newCachedThreadPool();
-	
-	public static final boolean useReactorPool = true;
+	private static final boolean useMultipleReactors = true;
+	//public static final boolean useReactorPool = true;
 	private static final int subReactorLength = 3;
 	public static final long selectTimeOut = TimeUnit.MILLISECONDS.toMillis(10);
 	private static final AtomicLong nextIndex = new AtomicLong();
 	
 	private static ServerSocketChannel serverChannel;
-	static{
-		try {
+	private static Reactor mainReactor;
+	private static Reactor[] subReactors;
+	
+	public static final boolean useThreadPool = true;
+	private static final ExecutorService executor = Executors.newCachedThreadPool();
+	
+	public static <T extends Reactor> void start(Class<T> clazz){
+		try{
 			serverChannel = ServerSocketChannel.open();
-		} catch (IOException e) {
+		}catch(IOException e){
 			e.printStackTrace();
 		}
-	}
-	
-	private static Reactor mainReactor;
-	private static Reactor[] subReactors = new Reactor[subReactorLength];
-	
-	public static <T extends Reactor> void start(Class<T> clazz, int port){
-		Constructor<T> constructor = null;
+		
 		try {
-			constructor = clazz.getConstructor(int.class);
-			mainReactor = constructor.newInstance(port);
-			mainReactor.configure();
+			Constructor<T> constructor = clazz.getConstructor(int.class, ServerSocketChannel.class, boolean.class, boolean.class, long.class);
+			mainReactor = constructor.newInstance(port, serverChannel, true, useMultipleReactors, selectTimeOut);
+			mainReactor.init();
 			
-			for(int i=0;i<subReactors.length;i++){
-				subReactors[i] = constructor.newInstance(port);
-				subReactors[i].configure();
+			if(useMultipleReactors){
+				subReactors = new Reactor[subReactorLength];
+				for(int i=0;i<subReactors.length;i++){
+					subReactors[i] = constructor.newInstance(port, serverChannel, false, useMultipleReactors, selectTimeOut);
+					subReactors[i].init();
+				}
 			}
 		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException 
 				| IllegalArgumentException | InvocationTargetException e) {
@@ -55,21 +56,11 @@ public class ServerContext{
 		} 
 		
 		mainReactor.start();
-		for(int i=0;i<subReactorLength;i++){
-			subReactors[i].start();
+		if(useMultipleReactors){
+			for(Reactor subReactor:subReactors){
+				subReactor.start();
+			}
 		}
-	}
-	
-	public static ServerSocketChannel serverChannel(){
-		return serverChannel;
-	}
-	
-	public static Reactor mainReactor(){
-		return mainReactor;
-	}
-	
-	public static boolean isMainReactor(Reactor reactor){
-		return reactor == mainReactor;
 	}
 	
 	public static Reactor nextSubReactor(){

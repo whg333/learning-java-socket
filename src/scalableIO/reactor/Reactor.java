@@ -1,9 +1,6 @@
 package scalableIO.reactor;
 
 import static scalableIO.Logger.log;
-import static scalableIO.ServerContext.isMainReactor;
-import static scalableIO.ServerContext.selectTimeOut;
-import static scalableIO.ServerContext.serverChannel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,28 +12,36 @@ import java.util.Iterator;
 public abstract class Reactor extends Thread{
 
 	protected final int port;
+	protected final ServerSocketChannel serverChannel;
+	protected final boolean isMainReactor;
+	protected final boolean useMultipleReactors;
+	protected final long timeout;
 	protected Selector selector;
-//	protected ServerSocketChannel serverChannel;
 	
-	public Reactor(int port){
+	public Reactor(int port, ServerSocketChannel serverChannel, boolean isMainReactor, boolean useMultipleReactors, long timeout){
 		this.port = port;
+		this.serverChannel = serverChannel;
+		this.isMainReactor = isMainReactor;
+		this.useMultipleReactors = useMultipleReactors;
+		this.timeout = timeout;
 	}
 	
-	public void configure(){
-		ServerSocketChannel serverChannel = serverChannel();
+	public void init(){
 		try {
 			selector = Selector.open();
-			log(selector+" isMainReactor="+isMainReactor(this));
-			if(isMainReactor(this)){
+			log(selector+" isMainReactor="+isMainReactor);
+			
+			if(isMainReactor){
 				log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
 				//serverChannel = ServerSocketChannel.open();
 				serverChannel.socket().bind(new InetSocketAddress(port));
 				serverChannel.configureBlocking(false);
 				SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-				key.attach(newAcceptor(selector, serverChannel));
+				key.attach(newAcceptor(selector));
 			}else{
 				
 			}
+			
 			//如果使用阻塞的select方式，且开启下面的代码的话，相当于开启了多个reactor池，而不是mainReactor和subReactor的关系了
 			//SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 			//key.attach(newAcceptor(selector, serverChannel));
@@ -45,7 +50,7 @@ public abstract class Reactor extends Thread{
 		}
 	}
 	
-	public abstract Acceptor newAcceptor(Selector selector, ServerSocketChannel serverChannel);
+	public abstract Acceptor newAcceptor(Selector selector);
 	
 	@Override
 	public void run(){
@@ -56,8 +61,8 @@ public abstract class Reactor extends Thread{
 				//最终选择了带有超时的select是因为使用selectNow的无限循环会导致CPU飙高特别快
 				//selector.select();
 				//if(selector.selectNow() > 0){
-				if(selector.select(selectTimeOut) > 0){
-					//log(selector+" isMainReactor="+isMainReactor(this)+" select...");
+				if(selector.select(timeout) > 0){
+					log(selector+" isMainReactor="+isMainReactor+" select...");
 					Iterator<SelectionKey> keyIt = selector.selectedKeys().iterator();
 					while(keyIt.hasNext()){
 						SelectionKey key = keyIt.next();

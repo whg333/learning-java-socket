@@ -8,8 +8,8 @@ import scalableIO.reactor.Acceptor;
 
 public class EchoAcceptor extends Acceptor {
 
-	EchoAcceptor(Selector selector, ServerSocketChannel serverChannel){
-		super(selector, serverChannel);
+	EchoAcceptor(Selector selector, ServerSocketChannel serverChannel, boolean useMultipleReactors){
+		super(selector, serverChannel, useMultipleReactors);
 	}
 	
 	@Override
