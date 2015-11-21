@@ -17,7 +17,6 @@ public class ServerContext{
 
 	public static final boolean isLog = true;
 	
-	//public static final boolean useReactorPool = true;
 	private static final int subReactorSize = 3;
 	public static final long selectTimeOut = TimeUnit.MILLISECONDS.toMillis(10);
 	private static final AtomicLong nextIndex = new AtomicLong();
@@ -79,16 +78,6 @@ public class ServerContext{
 		}
 		return subReactors[(int) (nextIndexValue%subReactors.length)];
 	}
-	
-	/**
-	 * 必须加上同步，确保所有的Selector都被安全的唤醒
-	 */
-//	public synchronized static void wakeupAll(){
-//		mainReactor.wakeup();
-//		for(Reactor subReactor:subReactors){
-//			subReactor.wakeup();
-//		}
-//	}
 	
 	public static <T> Future<T> submit(Callable<T> task){
 		return executor.submit(task);
