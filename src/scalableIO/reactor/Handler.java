@@ -117,7 +117,10 @@ public abstract class Handler extends Thread {
 		}
 	}
 	
-	/** 处理过程可能是比较耗时的，所以可考虑将其交由线程池处理，处理完毕后才注册感兴趣的write事件 */
+	/**
+	 * 处理过程可能是比较耗时的，所以可考虑将其交由线程池处理，处理完毕后才注册感兴趣的write事件<p>
+	 * 然而正是由于交由线程池处理所以可能造成重叠IO的多线程处理的状态问题，最好能一次性全部读入buffer，否则考虑同步状态处理问题
+	 */
 	private void processAndInterestWrite(){
 		Processor processor = new Processor();
 		if(useThreadPool){
@@ -137,12 +140,6 @@ public abstract class Handler extends Thread {
 	private /*synchronized*/ void processAndHandOff(){
 		if(process()){
 			interestOps(State.WRITING);
-//			if(useThreadPool){
-				//在另一个线程中改变key感兴趣IO事件的话，需要强迫selector立即返回，但单线程中不强迫也会生效？
-				//对key感兴趣IO事件改变的话，都只在下次调用了select后才会生效，故有必要强迫selector立即返回
-//				key.selector().wakeup();
-//				wakeupAll();
-//			}
 		}
 	}
 	
@@ -153,6 +150,7 @@ public abstract class Handler extends Thread {
 			disconnect();
 			return false;
 		}
+		
 		writeBuf = ByteBuffer.wrap(readData.toString().getBytes());
 		readData.delete(0, readData.length());
 		return true;
@@ -170,10 +168,7 @@ public abstract class Handler extends Thread {
 		
 		String writeData = new String(Arrays.copyOf(writeBuf.array(), writeBuf.array().length));
 		log("writed to client:"+writeData+", "+writeData.length());
-		
 		interestOps(State.READING);
-		//感兴趣key变化后必须重置附件？！否则连续2次回车后，read事件读取原来的附件读取不到（readSize==0）
-		//key.attach(this);
 	}
 	
 	/**
