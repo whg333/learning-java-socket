@@ -60,7 +60,7 @@ public abstract class Handler extends Thread {
 				connect();
 				break;
 			case READING:
-				read();
+				readAndProcess();
 				break;
 			case WRITING:
 				write();
@@ -86,7 +86,12 @@ public abstract class Handler extends Thread {
 	 * 不等待之前的处理完成的话，就会出现多个线程同时访问修改Handler里面数据的情况，导致出错，
 	 * 但是最好先把数据都全部读入buffer中就可以规避了！？
 	 */
-	private /*synchronized*/ void read(){
+	private /*synchronized*/ void readAndProcess(){
+		doRead();
+		doProcess();
+	}
+	
+	private void doRead(){
 		int readSize;
 		try {
 			while((readSize = clientChannel.read(readBuf)) > 0){
@@ -103,12 +108,16 @@ public abstract class Handler extends Thread {
 		}
 		
 		log("readed from client:"+readData+", "+readData.length());
+	}
+	
+	private void doProcess(){
 		if(readIsComplete()){
 			state = State.PROCESSING;
 			processAndInterestWrite();
 		}
 	}
 	
+	/** 处理过程可能是比较耗时的，所以可考虑将其交由线程池处理，处理完毕后才注册感兴趣的write事件 */
 	private void processAndInterestWrite(){
 		Processor processor = new Processor();
 		if(useThreadPool){
