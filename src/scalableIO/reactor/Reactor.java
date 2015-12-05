@@ -9,6 +9,14 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Iterator;
 
+/**
+ * Reactor反应器
+ * <ul>
+ * <li>及时响应相对于的读/写IO事件</li>
+ * <li>并分发到合适的Handler处理器上进行业务处理</li>
+ * <li>类似AWT中的单例事件分发线程</li>
+ * </ul>
+ */
 public abstract class Reactor extends Thread{
 
 	protected final int port;
@@ -75,6 +83,12 @@ public abstract class Reactor extends Thread{
 		}
 	}
 	
+	/**
+	 * 事件和事件处理器的绑定
+	 * <ul>
+	 * <li>管理IO读/写事件到事件处理器的一一对应的绑定</li>
+	 * </ul>
+	 */
 	private void dispatch(SelectionKey key){
 		Runnable r = (Runnable)key.attachment();
 		if(r != null){

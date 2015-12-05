@@ -21,8 +21,8 @@ public class EchoReactor extends Reactor {
 	
 	public static void main(String[] args) throws IOException {
 		//new EchoReactor(9003, ServerSocketChannel.open(), true, false, TimeUnit.MILLISECONDS.toMillis(10)).start();
-		ServerContext.startSingleReactor(9004, EchoReactor.class);
 		//ServerContext.startMultipleReactor(9004, EchoReactor.class);
+		ServerContext.startSingleReactor(9004, EchoReactor.class);
 	}
 
 }

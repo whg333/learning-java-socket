@@ -13,6 +13,13 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
+/**
+ * Handlers处理器
+ * <ul>
+ * <li>处理非阻塞读/写IO事件所对应的业务逻辑</li>
+ * <li>类似AWT中的ActionListeners处理器</li>
+ * </ul>
+ */
 public abstract class Handler extends Thread {
 
 	private enum State{
@@ -77,16 +84,23 @@ public abstract class Handler extends Thread {
 	/**
 	 * But harder to overlap processing with IO<br/>
 	 * Best when can first read all input a buffer<br/>
-	 * <br/>
+	 * <br>
 	 * That why we used synchronized on read method!<br/>
 	 * Just to protected read buffer And handler state...<br/>
-	 * <br/>
+	 * <br>
 	 * 其实就是害怕重叠IO和工作线程处理不一致：例如Reactor单线程读某个key的IO完毕后立马开启工作线程的处理，
 	 * 紧接着Reactor单线程处理第二个IO key的时候发现还是之前的那个key的读IO事件，但是之前同一个key的处理还未完成，
 	 * 不等待之前的处理完成的话，就会出现多个线程同时访问修改Handler里面数据的情况，导致出错，
 	 * 但是最好先把数据都全部读入buffer中就可以规避了！？
+	 * 
+	 * <p>此处的synchronized同步是为了防止state状态以及读写buffer在多线程访问中出现读脏数据，
+	 * Debug调试的时候同时访问一个SelectionKey有2个线程：
+	 * <br>1、Reactor单线程
+	 * <br>2、读数据完毕后多线程处理的话，线程池里面执行processAndHandOff的线程
+	 * <br>
+	 * 不能单一使用volatile或者原子变量的原因是因为该方法为复合操作（check and act）
 	 */
-	private /*synchronized*/ void readAndProcess(){
+	private synchronized void readAndProcess(){
 		doRead();
 		doProcess();
 	}
@@ -137,7 +151,7 @@ public abstract class Handler extends Thread {
 		}
 	}
 	
-	private /*synchronized*/ void processAndHandOff(){
+	private synchronized void processAndHandOff(){
 		if(process()){
 			interestOps(State.WRITING);
 		}
@@ -172,6 +186,10 @@ public abstract class Handler extends Thread {
 	}
 	
 	/**
+	 * 事件和事件处理器的绑定
+	 * <ul>
+	 * <li>类似AWT中的addActionListener添加监听器/观察者</li>
+	 * </ul>
 	 * 不需要重置key的附件（key.attach）是因为key一直绑定使用的是当前this实例，
 	 * 在Reactor dispatch的时候如果是接受（accept）该附件就是Acceptor实例，
 	 * 否则就是绑定到该key的同一个Handler实例

@@ -8,6 +8,12 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+/**
+ * 连接接收者
+ * <ul>
+ * <li>处理TCP/IP网络的连接，子SubReactor即在此处做分配</li>
+ * </ul>
+ */
 public abstract class Acceptor extends Thread {
 
 	protected final Selector selector;
