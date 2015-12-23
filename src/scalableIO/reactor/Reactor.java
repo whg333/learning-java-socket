@@ -34,28 +34,6 @@ public abstract class Reactor extends Thread{
 		this.timeout = timeout;
 	}
 	
-	private void init() throws IOException{
-		selector = Selector.open();
-		log(selector+" isMainReactor="+isMainReactor);
-		
-		if(isMainReactor){
-			//serverChannel = ServerSocketChannel.open();
-			serverChannel.socket().bind(new InetSocketAddress(port));
-			serverChannel.configureBlocking(false);
-			SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			key.attach(newAcceptor(selector));
-			log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
-		}else{
-			
-		}
-		
-		//如果使用阻塞的select方式，且开启下面的代码的话，相当于开启了多个reactor池，而不是mainReactor和subReactor的关系了
-		//SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-		//key.attach(newAcceptor(selector, serverChannel));
-	}
-	
-	public abstract Acceptor newAcceptor(Selector selector);
-	
 	@Override
 	public void run(){
 		try {
@@ -82,6 +60,28 @@ public abstract class Reactor extends Thread{
 			e.printStackTrace();
 		}
 	}
+	
+	private void init() throws IOException{
+		selector = Selector.open();
+		log(selector+" isMainReactor="+isMainReactor);
+		
+		if(isMainReactor){
+			//serverChannel = ServerSocketChannel.open();
+			serverChannel.socket().bind(new InetSocketAddress(port));
+			serverChannel.configureBlocking(false);
+			SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+			key.attach(newAcceptor(selector));
+			log(getClass().getSimpleName()+" start on "+port+" ..."+"\n");
+		}else{
+			
+		}
+		
+		//如果使用阻塞的select方式，且开启下面的代码的话，相当于开启了多个reactor池，而不是mainReactor和subReactor的关系了
+		//SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+		//key.attach(newAcceptor(selector, serverChannel));
+	}
+	
+	public abstract Acceptor newAcceptor(Selector selector);
 	
 	/**
 	 * 事件和事件处理器的绑定
