@@ -33,8 +33,8 @@ public abstract class Acceptor extends Thread {
 			 SocketChannel clientChannel = serverChannel.accept();
 			 if(clientChannel != null){
 				 log(selector+" clientChannel not null...");
-				 //���ʹ��������select��ʽ����Ŀ���ǿ����˶��reactor�أ�������mainReactor��subReactor�Ĺ�ϵ�Ļ���
-				 //������Ͳ���nextSubSelector().selector�����Ǹ�Ϊ���ݵ�ǰʵ����selector���󼴿�
+				 //如果使用阻塞的select方式，且目的是开启了多个reactor池，而不是mainReactor和subReactor的关系的话，
+				 //则下面就不是nextSubSelector().selector，而是改为传递当前实例的selector对象即可
 				 handle(useMultipleReactors ? nextSubReactor().selector : selector, clientChannel);
 			 }else{
 				 log(selector+" clientChannel is null...");
@@ -45,8 +45,8 @@ public abstract class Acceptor extends Thread {
 	}
 	
 	/**
-	 * ��ÿ�������Handler�µ���run������Ϊ�������connecting״̬��Ϊreading״̬��
-	 * ��ԭpdf�汾�µ�������һ���ģ�ֻ����ԭpdf�汾���ڹ��캯��ֱ���޸������˸���ȤΪread�¼�
+	 * 在每个具体的Handler下调用run方法是为了令其从connecting状态变为reading状态，
+	 * 和原pdf版本下的做法是一样的，只不过原pdf版本是在构造函数直接修改设置了感兴趣为read事件
 	 */
 	public abstract void handle(Selector selector, SocketChannel clientSocket);
 
