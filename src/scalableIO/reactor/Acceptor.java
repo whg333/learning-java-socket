@@ -9,9 +9,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 /**
- * Á¬½Ó½ÓÊÕÕß
+ * è¿æ¥æ¥æ”¶è€…
  * <ul>
- * <li>´¦ÀíTCP/IPÍøÂçµÄÁ¬½Ó£¬×ÓSubReactor¼´ÔÚ´Ë´¦×ö·ÖÅä</li>
+ * <li>å¤„ç†TCP/IPç½‘ç»œçš„è¿æ¥ï¼Œå­SubReactorå³åœ¨æ­¤å¤„åšåˆ†é…</li>
  * </ul>
  */
 public abstract class Acceptor extends Thread {
@@ -33,8 +33,8 @@ public abstract class Acceptor extends Thread {
 			 SocketChannel clientChannel = serverChannel.accept();
 			 if(clientChannel != null){
 				 log(selector+" clientChannel not null...");
-				 //Èç¹ûÊ¹ÓÃ×èÈûµÄselect·½Ê½£¬ÇÒÄ¿µÄÊÇ¿ªÆôÁË¶à¸öreactor³Ø£¬¶ø²»ÊÇmainReactorºÍsubReactorµÄ¹ØÏµµÄ»°£¬
-				 //ÔòÏÂÃæ¾Í²»ÊÇnextSubSelector().selector£¬¶øÊÇ¸ÄÎª´«µİµ±Ç°ÊµÀıµÄselector¶ÔÏó¼´¿É
+				 //ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½selectï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½reactorï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mainReactorï¿½ï¿½subReactorï¿½Ä¹ï¿½Ïµï¿½Ä»ï¿½ï¿½ï¿½
+				 //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í²ï¿½ï¿½ï¿½nextSubSelector().selectorï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½Îªï¿½ï¿½ï¿½İµï¿½Ç°Êµï¿½ï¿½ï¿½ï¿½selectorï¿½ï¿½ï¿½ó¼´¿ï¿½
 				 handle(useMultipleReactors ? nextSubReactor().selector : selector, clientChannel);
 			 }else{
 				 log(selector+" clientChannel is null...");
@@ -45,8 +45,8 @@ public abstract class Acceptor extends Thread {
 	}
 	
 	/**
-	 * ÔÚÃ¿¸ö¾ßÌåµÄHandlerÏÂµ÷ÓÃrun·½·¨ÊÇÎªÁËÁîÆä´Óconnecting×´Ì¬±äÎªreading×´Ì¬£¬
-	 * ºÍÔ­pdf°æ±¾ÏÂµÄ×ö·¨ÊÇÒ»ÑùµÄ£¬Ö»²»¹ıÔ­pdf°æ±¾ÊÇÔÚ¹¹Ôìº¯ÊıÖ±½ÓĞŞ¸ÄÉèÖÃÁË¸ĞĞËÈ¤ÎªreadÊÂ¼ş
+	 * ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Handlerï¿½Âµï¿½ï¿½ï¿½runï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½connecting×´Ì¬ï¿½ï¿½Îªreading×´Ì¬ï¿½ï¿½
+	 * ï¿½ï¿½Ô­pdfï¿½æ±¾ï¿½Âµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ä£ï¿½Ö»ï¿½ï¿½ï¿½ï¿½Ô­pdfï¿½æ±¾ï¿½ï¿½ï¿½Ú¹ï¿½ï¿½ìº¯ï¿½ï¿½Ö±ï¿½ï¿½ï¿½Ş¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¸ï¿½ï¿½ï¿½È¤Îªreadï¿½Â¼ï¿½
 	 */
 	public abstract void handle(Selector selector, SocketChannel clientSocket);
 
