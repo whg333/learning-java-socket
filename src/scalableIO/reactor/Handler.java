@@ -14,10 +14,10 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
 /**
- * Handlers´¦ÀíÆ÷
+ * Handlerså¤„ç†å™¨
  * <ul>
- * <li>´¦Àí·Ç×èÈû¶Á/Ğ´IOÊÂ¼şËù¶ÔÓ¦µÄÒµÎñÂß¼­</li>
- * <li>ÀàËÆAWTÖĞµÄActionListeners´¦ÀíÆ÷</li>
+ * <li>å¤„ç†éé˜»å¡è¯»/å†™IOäº‹ä»¶æ‰€å¯¹åº”çš„ä¸šåŠ¡é€»è¾‘</li>
+ * <li>ç±»ä¼¼AWTä¸­çš„ActionListenerså¤„ç†å™¨</li>
  * </ul>
  */
 public abstract class Handler extends Thread {
@@ -47,8 +47,8 @@ public abstract class Handler extends Thread {
 		SelectionKey key = null;
 		try {
 			clientChannel.configureBlocking(false);
-			//ÕâÀïÔÚÊ¹ÓÃsubSelectorµÄÊ±ºò»á×èÈû£¬ÎªÊ²Ã´£¿ÊÇÒòÎªÊ¹ÓÃÁË×èÈûµÄselect·½·¨£¬·Ç×èÈûµÄ²Å¿ÉÒÔ
-			//µ«Èç¹ûÊ¹ÓÃreactor³ØµÄ»°£¬ÄÇÊÇÒòÎªĞèÒªserverChannel×¢²áselectorµÄacceptÊÂ¼ş£¡£¿±ØĞë¶ÔÓ¦ÉÏ²Å¿ÉÒÔÍ¨¹ı£¬·ñÔò×èÈû
+			//è¿™é‡Œåœ¨ä½¿ç”¨subSelectorçš„æ—¶å€™ä¼šé˜»å¡ï¼Œä¸ºä»€ä¹ˆï¼Ÿæ˜¯å› ä¸ºä½¿ç”¨äº†é˜»å¡çš„selectæ–¹æ³•ï¼Œéé˜»å¡çš„æ‰å¯ä»¥
+			//ä½†å¦‚æœä½¿ç”¨reactoræ± çš„è¯ï¼Œé‚£æ˜¯å› ä¸ºéœ€è¦serverChannelæ³¨å†Œselectorçš„acceptäº‹ä»¶ï¼ï¼Ÿå¿…é¡»å¯¹åº”ä¸Šæ‰å¯ä»¥é€šè¿‡ï¼Œå¦åˆ™é˜»å¡
 			key = clientChannel.register(selector, this.state.opBit);
 			key.attach(this);
 		} catch (Exception e) {
@@ -88,17 +88,17 @@ public abstract class Handler extends Thread {
 	 * That why we used synchronized on read method!<br/>
 	 * Just to protected read buffer And handler state...<br/>
 	 * <br>
-	 * ÆäÊµ¾ÍÊÇº¦ÅÂÖØµşIOºÍ¹¤×÷Ïß³Ì´¦Àí²»Ò»ÖÂ£ºÀıÈçReactorµ¥Ïß³Ì¶ÁÄ³¸ökeyµÄIOÍê±ÏºóÁ¢Âí¿ªÆô¹¤×÷Ïß³ÌµÄ´¦Àí£¬
-	 * ½ô½Ó×ÅReactorµ¥Ïß³Ì´¦ÀíµÚ¶ş¸öIO keyµÄÊ±ºò·¢ÏÖ»¹ÊÇÖ®Ç°µÄÄÇ¸ökeyµÄ¶ÁIOÊÂ¼ş£¬µ«ÊÇÖ®Ç°Í¬Ò»¸ökeyµÄ´¦Àí»¹Î´Íê³É£¬
-	 * ²»µÈ´ıÖ®Ç°µÄ´¦ÀíÍê³ÉµÄ»°£¬¾Í»á³öÏÖ¶à¸öÏß³ÌÍ¬Ê±·ÃÎÊĞŞ¸ÄHandlerÀïÃæÊı¾İµÄÇé¿ö£¬µ¼ÖÂ³ö´í£¬
-	 * µ«ÊÇ×îºÃÏÈ°ÑÊı¾İ¶¼È«²¿¶ÁÈëbufferÖĞ¾Í¿ÉÒÔ¹æ±ÜÁË£¡£¿
+	 * å…¶å®å°±æ˜¯å®³æ€•é‡å IOå’Œå·¥ä½œçº¿ç¨‹å¤„ç†ä¸ä¸€è‡´ï¼šä¾‹å¦‚Reactorå•çº¿ç¨‹è¯»æŸä¸ªkeyçš„IOå®Œæ¯•åç«‹é©¬å¼€å¯å·¥ä½œçº¿ç¨‹çš„å¤„ç†ï¼Œ
+	 * ç´§æ¥ç€Reactorå•çº¿ç¨‹å¤„ç†ç¬¬äºŒä¸ªIO keyçš„æ—¶å€™å‘ç°è¿˜æ˜¯ä¹‹å‰çš„é‚£ä¸ªkeyçš„è¯»IOäº‹ä»¶ï¼Œä½†æ˜¯ä¹‹å‰åŒä¸€ä¸ªkeyçš„å¤„ç†è¿˜æœªå®Œæˆï¼Œ
+	 * ä¸ç­‰å¾…ä¹‹å‰çš„å¤„ç†å®Œæˆçš„è¯ï¼Œå°±ä¼šå‡ºç°å¤šä¸ªçº¿ç¨‹åŒæ—¶è®¿é—®ä¿®æ”¹Handleré‡Œé¢æ•°æ®çš„æƒ…å†µï¼Œå¯¼è‡´å‡ºé”™ï¼Œ
+	 * ä½†æ˜¯æœ€å¥½å…ˆæŠŠæ•°æ®éƒ½å…¨éƒ¨è¯»å…¥bufferä¸­å°±å¯ä»¥è§„é¿äº†ï¼ï¼Ÿ
 	 * 
-	 * <p>´Ë´¦µÄsynchronizedÍ¬²½ÊÇÎªÁË·ÀÖ¹state×´Ì¬ÒÔ¼°¶ÁĞ´bufferÔÚ¶àÏß³Ì·ÃÎÊÖĞ³öÏÖ¶ÁÔàÊı¾İ£¬
-	 * Debugµ÷ÊÔµÄÊ±ºòÍ¬Ê±·ÃÎÊÒ»¸öSelectionKeyÓĞ2¸öÏß³Ì£º
-	 * <br>1¡¢Reactorµ¥Ïß³Ì
-	 * <br>2¡¢¶ÁÊı¾İÍê±Ïºó¶àÏß³Ì´¦ÀíµÄ»°£¬Ïß³Ì³ØÀïÃæÖ´ĞĞprocessAndHandOffµÄÏß³Ì
+	 * <p>æ­¤å¤„çš„synchronizedåŒæ­¥æ˜¯ä¸ºäº†é˜²æ­¢stateçŠ¶æ€ä»¥åŠè¯»å†™bufferåœ¨å¤šçº¿ç¨‹è®¿é—®ä¸­å‡ºç°è¯»è„æ•°æ®ï¼Œ
+	 * Debugè°ƒè¯•çš„æ—¶å€™åŒæ—¶è®¿é—®ä¸€ä¸ªSelectionKeyæœ‰2ä¸ªçº¿ç¨‹ï¼š
+	 * <br>1ã€Reactorå•çº¿ç¨‹
+	 * <br>2ã€è¯»æ•°æ®å®Œæ¯•åå¤šçº¿ç¨‹å¤„ç†çš„è¯ï¼Œçº¿ç¨‹æ± é‡Œé¢æ‰§è¡ŒprocessAndHandOffçš„çº¿ç¨‹
 	 * <br>
-	 * ²»ÄÜµ¥Ò»Ê¹ÓÃvolatile»òÕßÔ­×Ó±äÁ¿µÄÔ­ÒòÊÇÒòÎª¸Ã·½·¨Îª¸´ºÏ²Ù×÷£¨check and act£©
+	 * ä¸èƒ½å•ä¸€ä½¿ç”¨volatileæˆ–è€…åŸå­å˜é‡çš„åŸå› æ˜¯å› ä¸ºè¯¥æ–¹æ³•ä¸ºå¤åˆæ“ä½œï¼ˆcheck and actï¼‰
 	 */
 	private synchronized void readAndProcess(){
 		doRead();
@@ -132,8 +132,8 @@ public abstract class Handler extends Thread {
 	}
 	
 	/**
-	 * ´¦Àí¹ı³Ì¿ÉÄÜÊÇ±È½ÏºÄÊ±µÄ£¬ËùÒÔ¿É¿¼ÂÇ½«Æä½»ÓÉÏß³Ì³Ø´¦Àí£¬´¦ÀíÍê±Ïºó²Å×¢²á¸ĞĞËÈ¤µÄwriteÊÂ¼ş<p>
-	 * È»¶øÕıÊÇÓÉÓÚ½»ÓÉÏß³Ì³Ø´¦ÀíËùÒÔ¿ÉÄÜÔì³ÉÖØµşIOµÄ¶àÏß³Ì´¦ÀíµÄ×´Ì¬ÎÊÌâ£¬×îºÃÄÜÒ»´ÎĞÔÈ«²¿¶ÁÈëbuffer£¬·ñÔò¿¼ÂÇÍ¬²½×´Ì¬´¦ÀíÎÊÌâ
+	 * å¤„ç†è¿‡ç¨‹å¯èƒ½æ˜¯æ¯”è¾ƒè€—æ—¶çš„ï¼Œæ‰€ä»¥å¯è€ƒè™‘å°†å…¶äº¤ç”±çº¿ç¨‹æ± å¤„ç†ï¼Œå¤„ç†å®Œæ¯•åæ‰æ³¨å†Œæ„Ÿå…´è¶£çš„writeäº‹ä»¶<p>
+	 * ç„¶è€Œæ­£æ˜¯ç”±äºäº¤ç”±çº¿ç¨‹æ± å¤„ç†æ‰€ä»¥å¯èƒ½é€ æˆé‡å IOçš„å¤šçº¿ç¨‹å¤„ç†çš„çŠ¶æ€é—®é¢˜ï¼Œæœ€å¥½èƒ½ä¸€æ¬¡æ€§å…¨éƒ¨è¯»å…¥bufferï¼Œå¦åˆ™è€ƒè™‘åŒæ­¥çŠ¶æ€å¤„ç†é—®é¢˜
 	 */
 	private void processAndInterestWrite(){
 		Processor processor = new Processor();
@@ -157,7 +157,7 @@ public abstract class Handler extends Thread {
 		}
 	}
 	
-	//TODO ĞŞ¸ÄÎª¸´ÓÃoutput£¬¼´µ±outputÈİÁ¿²»×ãµÄÊ±ºò¾Í·´¸´write£¬¶ø²»ÊÇÃ¿´Î¶¼Ê¹ÓÃwrapÀ´newÒ»¸öĞÂµÄ
+	//TODO ä¿®æ”¹ä¸ºå¤ç”¨outputï¼Œå³å½“outputå®¹é‡ä¸è¶³çš„æ—¶å€™å°±åå¤writeï¼Œè€Œä¸æ˜¯æ¯æ¬¡éƒ½ä½¿ç”¨wrapæ¥newä¸€ä¸ªæ–°çš„
 	public boolean process(){
 		log("process readData="+readData.toString());
 		if(isQuit()){
@@ -186,13 +186,13 @@ public abstract class Handler extends Thread {
 	}
 	
 	/**
-	 * ÊÂ¼şºÍÊÂ¼ş´¦ÀíÆ÷µÄ°ó¶¨
+	 * äº‹ä»¶å’Œäº‹ä»¶å¤„ç†å™¨çš„ç»‘å®š
 	 * <ul>
-	 * <li>ÀàËÆAWTÖĞµÄaddActionListenerÌí¼Ó¼àÌıÆ÷/¹Û²ìÕß</li>
+	 * <li>ç±»ä¼¼AWTä¸­çš„addActionListeneræ·»åŠ ç›‘å¬å™¨/è§‚å¯Ÿè€…</li>
 	 * </ul>
-	 * ²»ĞèÒªÖØÖÃkeyµÄ¸½¼ş£¨key.attach£©ÊÇÒòÎªkeyÒ»Ö±°ó¶¨Ê¹ÓÃµÄÊÇµ±Ç°thisÊµÀı£¬
-	 * ÔÚReactor dispatchµÄÊ±ºòÈç¹ûÊÇ½ÓÊÜ£¨accept£©¸Ã¸½¼ş¾ÍÊÇAcceptorÊµÀı£¬
-	 * ·ñÔò¾ÍÊÇ°ó¶¨µ½¸ÃkeyµÄÍ¬Ò»¸öHandlerÊµÀı
+	 * ä¸éœ€è¦é‡ç½®keyçš„é™„ä»¶ï¼ˆkey.attachï¼‰æ˜¯å› ä¸ºkeyä¸€ç›´ç»‘å®šä½¿ç”¨çš„æ˜¯å½“å‰thiså®ä¾‹ï¼Œ
+	 * åœ¨Reactor dispatchçš„æ—¶å€™å¦‚æœæ˜¯æ¥å—ï¼ˆacceptï¼‰è¯¥é™„ä»¶å°±æ˜¯Acceptorå®ä¾‹ï¼Œ
+	 * å¦åˆ™å°±æ˜¯ç»‘å®šåˆ°è¯¥keyçš„åŒä¸€ä¸ªHandlerå®ä¾‹
 	 */
 	private void interestOps(State state){
 		this.state = state;
@@ -209,7 +209,7 @@ public abstract class Handler extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		log("\nclient Address=¡¾"+clientAddress(clientChannel)+"¡¿ had already closed!!! ");
+		log("\nclient Address=ã€"+clientAddress(clientChannel)+"ã€‘ had already closed!!! ");
 	}
 	
 	private static SocketAddress clientAddress(SocketChannel clientChannel){

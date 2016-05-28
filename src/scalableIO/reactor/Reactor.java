@@ -10,11 +10,11 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.Iterator;
 
 /**
- * Reactor·´Ó¦Æ÷
+ * Reactorååº”å™¨
  * <ul>
- * <li>¼°Ê±ÏìÓ¦Ïà¶ÔÓÚµÄ¶Á/Ğ´IOÊÂ¼ş</li>
- * <li>²¢·Ö·¢µ½ºÏÊÊµÄHandler´¦ÀíÆ÷ÉÏ½øĞĞÒµÎñ´¦Àí</li>
- * <li>ÀàËÆAWTÖĞµÄµ¥ÀıÊÂ¼ş·Ö·¢Ïß³Ì</li>
+ * <li>åŠæ—¶å“åº”ç›¸å¯¹äºçš„è¯»/å†™IOäº‹ä»¶</li>
+ * <li>å¹¶åˆ†å‘åˆ°åˆé€‚çš„Handlerå¤„ç†å™¨ä¸Šè¿›è¡Œä¸šåŠ¡å¤„ç†</li>
+ * <li>ç±»ä¼¼AWTä¸­çš„å•ä¾‹äº‹ä»¶åˆ†å‘çº¿ç¨‹</li>
  * </ul>
  */
 public abstract class Reactor extends Thread{
@@ -39,10 +39,10 @@ public abstract class Reactor extends Thread{
 		try {
 			init();
 			while(!Thread.interrupted()){
-				//²»¿ÉÒÔÊ¹ÓÃ×èÈûµÄselect·½Ê½£¬·ñÔòacceptºósubReactorµÄselectorÔÚregisterµÄÊ±ºò»áÒ»Ö±×èÈû
-				//µ«ÊÇĞŞ¸ÄÎª´øÓĞ³¬Ê±µÄselect»òÕßselectNowºó£¬subReactorµÄselectorÔÚregister¾Í²»»á×èÈûÁË
-				//×îÖÕÑ¡ÔñÁË´øÓĞ³¬Ê±µÄselectÊÇÒòÎªÊ¹ÓÃselectNowµÄÎŞÏŞÑ­»·»áµ¼ÖÂCPUì­¸ßÌØ±ğ¿ì
-				//²¢ÇÒÈç¹ûÊ¹ÓÃ×èÈûµÄselect·½Ê½£¬»¹ĞèÒªÖªµÀÔÚÄÄÀïµ÷ÓÃwakeup£¬·ñÔò»áÒ»Ö±×èÈû£¬Ê¹ÓÃ·Ç×èÈû·½Ê½¾Í²»ĞèÒªwakeupÁË
+				//ä¸å¯ä»¥ä½¿ç”¨é˜»å¡çš„selectæ–¹å¼ï¼Œå¦åˆ™acceptåsubReactorçš„selectoråœ¨registerçš„æ—¶å€™ä¼šä¸€ç›´é˜»å¡
+				//ä½†æ˜¯ä¿®æ”¹ä¸ºå¸¦æœ‰è¶…æ—¶çš„selectæˆ–è€…selectNowåï¼ŒsubReactorçš„selectoråœ¨registerå°±ä¸ä¼šé˜»å¡äº†
+				//æœ€ç»ˆé€‰æ‹©äº†å¸¦æœ‰è¶…æ—¶çš„selectæ˜¯å› ä¸ºä½¿ç”¨selectNowçš„æ— é™å¾ªç¯ä¼šå¯¼è‡´CPUé£™é«˜ç‰¹åˆ«å¿«
+				//å¹¶ä¸”å¦‚æœä½¿ç”¨é˜»å¡çš„selectæ–¹å¼ï¼Œè¿˜éœ€è¦çŸ¥é“åœ¨å“ªé‡Œè°ƒç”¨wakeupï¼Œå¦åˆ™ä¼šä¸€ç›´é˜»å¡ï¼Œä½¿ç”¨éé˜»å¡æ–¹å¼å°±ä¸éœ€è¦wakeupäº†
 				//selector.select();
 				//if(selector.selectNow() > 0){
 				if(selector.select(timeout) > 0){
@@ -76,7 +76,7 @@ public abstract class Reactor extends Thread{
 			
 		}
 		
-		//Èç¹ûÊ¹ÓÃ×èÈûµÄselect·½Ê½£¬ÇÒ¿ªÆôÏÂÃæµÄ´úÂëµÄ»°£¬Ïàµ±ÓÚ¿ªÆôÁË¶à¸öreactor³Ø£¬¶ø²»ÊÇmainReactorºÍsubReactorµÄ¹ØÏµÁË
+		//å¦‚æœä½¿ç”¨é˜»å¡çš„selectæ–¹å¼ï¼Œä¸”å¼€å¯ä¸‹é¢çš„ä»£ç çš„è¯ï¼Œç›¸å½“äºå¼€å¯äº†å¤šä¸ªreactoræ± ï¼Œè€Œä¸æ˜¯mainReactorå’ŒsubReactorçš„å…³ç³»äº†
 		//SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 		//key.attach(newAcceptor(selector, serverChannel));
 	}
@@ -84,9 +84,9 @@ public abstract class Reactor extends Thread{
 	public abstract Acceptor newAcceptor(Selector selector);
 	
 	/**
-	 * ÊÂ¼şºÍÊÂ¼ş´¦ÀíÆ÷µÄ°ó¶¨
+	 * äº‹ä»¶å’Œäº‹ä»¶å¤„ç†å™¨çš„ç»‘å®š
 	 * <ul>
-	 * <li>¹ÜÀíIO¶Á/Ğ´ÊÂ¼şµ½ÊÂ¼ş´¦ÀíÆ÷µÄÒ»Ò»¶ÔÓ¦µÄ°ó¶¨</li>
+	 * <li>ç®¡ç†IOè¯»/å†™äº‹ä»¶åˆ°äº‹ä»¶å¤„ç†å™¨çš„ä¸€ä¸€å¯¹åº”çš„ç»‘å®š</li>
 	 * </ul>
 	 */
 	private void dispatch(SelectionKey key){
