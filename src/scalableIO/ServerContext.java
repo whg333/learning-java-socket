@@ -57,8 +57,7 @@ public class ServerContext{
 					subReactors[i] = constructor.newInstance(port, serverChannel, false, useMultipleReactors, selectTimeOut);
 				}
 			}
-		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException 
-				| IllegalArgumentException | InvocationTargetException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 		
